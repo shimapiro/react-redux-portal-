@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { login } from "../store/authSlice";
-
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { loginApi } from "../api/auth";
 import { AppDispatch } from "../store";
+import { login } from "../store/authSlice";
 
 const schema = z.object({
   email: z
@@ -17,6 +18,10 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const LoginForm = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const [erroMsg, setErroMsg] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -25,14 +30,21 @@ const LoginForm = () => {
     resolver: zodResolver(schema),
   });
 
-  const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
+  const onsubmit = async (data: FormData) => {
+    setErroMsg("");
 
-  const onsubmit = (data: FormData) => {
-    console.log("ログイン成功", data);
+    try {
+      const res = await loginApi(data);
 
-    dispatch(login());
-    navigate("/dashbord");
+      localStorage.setItem("token", res.token);
+      dispatch(login());
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("API失敗", err);
+      setErroMsg(
+        "ログインに失敗しました。メールとパスワードを確認してください"
+      );
+    }
   };
 
   return (
@@ -69,6 +81,9 @@ const LoginForm = () => {
         >
           ログイン
         </button>
+        {erroMsg && (
+          <p className="text-red-500 text-sm mt-2 text-center">{erroMsg}</p>
+        )}
       </div>
     </form>
   );
