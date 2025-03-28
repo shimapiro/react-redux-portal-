@@ -1,9 +1,17 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import LoginForm from "./components/LoginForm";
+import Dashboard from "./pages/Dashbord";
+
 function App() {
   return (
-    <>
-      <div className="animate-fade-in">フェードイン</div>
-      <button className="animate-bounce">Click me!</button>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/dashbord" element={<Dashboard />} />
+
+        <Route path="*" element={<LoginForm />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
